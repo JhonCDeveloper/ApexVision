@@ -182,49 +182,7 @@ const ScenarioSelector = ({ onSelect, onBack }) => {
 /* ============================================================
    STEP PROGRESS — indicador visual de paso X de N
    ============================================================ */
-const StepProgress = ({ current, steps = [window.L('Escenario', 'Scenario'), window.L('Grabación', 'Recording'), window.L('Resultados', 'Results')] }) => (
-  <div style={{ display: 'flex', alignItems: 'center', marginBottom: 28 }}>
-    {steps.map((label, i) => {
-      const step = i + 1;
-      const done   = step < current;
-      const active = step === current;
-      return (
-        <React.Fragment key={step}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 7, flexShrink: 0 }}>
-            <div style={{
-              width: 26, height: 26, borderRadius: '50%',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 10.5, fontWeight: 600,
-              background: done   ? 'rgba(158,245,190,0.15)' :
-                          active ? 'rgba(255,255,255,0.1)'  : 'transparent',
-              border: done   ? '1px solid rgba(158,245,190,0.45)' :
-                      active ? '1px solid rgba(255,255,255,0.35)' :
-                               '1px solid rgba(255,255,255,0.1)',
-              color: done   ? '#9ef5be' :
-                     active ? 'var(--ink-90)' : 'var(--ink-25)',
-              transition: 'all 240ms',
-            }}>
-              {done ? <SIcon name="check" size={11} stroke={2} /> : step}
-            </div>
-            <span style={{
-              fontSize: 11.5,
-              color: active ? 'var(--ink-80)' : done ? 'var(--ink-45)' : 'var(--ink-25)',
-              letterSpacing: '0.02em',
-              transition: 'color 240ms',
-            }}>{label}</span>
-          </div>
-          {i < steps.length - 1 && (
-            <div style={{
-              flex: 1, height: 1, margin: '0 10px',
-              background: done ? 'rgba(158,245,190,0.25)' : 'rgba(255,255,255,0.07)',
-              transition: 'background 240ms',
-            }} />
-          )}
-        </React.Fragment>
-      );
-    })}
-  </div>
-);
+import StepProgress from '../components/ui/StepProgress.jsx';
 
 /* ============================================================
    SELLER DASHBOARD — vista post-login del vendedor
@@ -232,19 +190,7 @@ const StepProgress = ({ current, steps = [window.L('Escenario', 'Scenario'), win
 const statusLabel = { pending: 'Pendiente', processing: 'Procesando', completed: 'Completado', failed: 'Error' };
 const statusColor = { pending: 'var(--ink-40)', processing: '#f9d45b', completed: '#9ef5be', failed: '#fca5a5' };
 
-const ScoreRing = ({ score }) => {
-  const r = 22, circ = 2 * Math.PI * r;
-  const pct = Math.min(100, Math.max(0, score)) / 100;
-  return (
-    <svg width={56} height={56} viewBox="0 0 56 56">
-      <circle cx={28} cy={28} r={r} fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth={4}/>
-      <circle cx={28} cy={28} r={r} fill="none" stroke="#9ef5be" strokeWidth={4}
-        strokeDasharray={circ} strokeDashoffset={circ * (1 - pct)}
-        strokeLinecap="round" transform="rotate(-90 28 28)" style={{transition:'stroke-dashoffset 600ms ease'}}/>
-      <text x={28} y={33} textAnchor="middle" fontSize={13} fontWeight={300} fill="white">{score}</text>
-    </svg>
-  );
-};
+import ScoreRing from '../components/ui/ScoreRing.jsx';
 
 const SellerDashboard = ({ user, onStart, onViewResult }) => {
   window.useLang(); const L = window.L;
@@ -1185,32 +1131,7 @@ const SellerProfile = ({ user, onGoTab }) => {
    ============================================================ */
 const normScore = (e) => evalScore(e);
 
-const ScoreMini = ({ scores }) => {
-  if (scores.length < 2) return null;
-  const W = 160, H = 44, pad = 6;
-  const lo = Math.max(0, Math.min(...scores) - 8);
-  const hi = Math.min(100, Math.max(...scores) + 8);
-  const range = hi - lo || 1;
-  const xs = scores.map((_, i) => pad + (i / (scores.length - 1)) * (W - pad * 2));
-  const ys = scores.map(s => H - pad - ((s - lo) / range) * (H - pad * 2));
-  const last = scores[scores.length - 1];
-  const prev = scores[scores.length - 2];
-  const color = last > prev ? '#9ef5be' : last < prev ? '#fca5a5' : 'rgba(255,255,255,0.35)';
-  const area = `M${xs[0]},${H} ` + xs.map((x, i) => `L${x},${ys[i]}`).join(' ') + ` L${xs[xs.length-1]},${H} Z`;
-  return (
-    <svg width={W} height={H} style={{ display: 'block' }}>
-      <defs>
-        <linearGradient id="sg" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={color} stopOpacity="0.18" />
-          <stop offset="100%" stopColor={color} stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      <path d={area} fill="url(#sg)" />
-      <polyline points={xs.map((x, i) => `${x},${ys[i]}`).join(' ')} fill="none" stroke={color} strokeWidth={1.5} strokeLinejoin="round" strokeLinecap="round" />
-      <circle cx={xs[xs.length-1]} cy={ys[ys.length-1]} r={3.5} fill={color} />
-    </svg>
-  );
-};
+import ScoreMini from '../components/ui/ScoreMini.jsx';
 
 const SellerMainDashboard = ({ user, onStart, onGoTab }) => {
   window.useLang(); const L = window.L;
