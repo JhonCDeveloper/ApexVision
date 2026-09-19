@@ -16,114 +16,17 @@ function evalScore(e) {
 /* ============================================================
    ICONS
    ============================================================ */
-const SIcon = ({ name, size = 16, stroke = 1.4 }) => {
-  const p = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: stroke, strokeLinecap: "round", strokeLinejoin: "round" };
-  switch (name) {
-    case 'home':      return <svg {...p}><path d="M3 11l9-8 9 8M5 9v11h5v-7h4v7h5V9"/></svg>;
-    case 'mic':       return <svg {...p}><rect x="9" y="3" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/></svg>;
-    case 'video':     return <svg {...p}><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M22 7l-6 5 6 5z"/></svg>;
-    case 'close':     return <svg {...p}><path d="M6 6l12 12M18 6L6 18"/></svg>;
-    case 'play':      return <svg {...p}><polygon points="6 3 20 12 6 21 6 3" fill="currentColor"/></svg>;
-    case 'redo':      return <svg {...p}><path d="M21 12a9 9 0 11-3-6.7L21 8M21 3v5h-5"/></svg>;
-    case 'check':     return <svg {...p}><path d="M5 12l5 5 9-12"/></svg>;
-    case 'arrow':     return <svg {...p}><path d="M5 12h14M13 5l7 7-7 7"/></svg>;
-    case 'sparkle':   return <svg {...p}><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.5 5.5L8 8M16 16l2.5 2.5M5.5 18.5L8 16M16 8l2.5-2.5"/></svg>;
-    case 'download':  return <svg {...p}><path d="M12 3v13M6 11l6 6 6-6M4 21h16"/></svg>;
-    case 'progress':  return <svg {...p}><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg>;
-    case 'history':   return <svg {...p}><path d="M3 12a9 9 0 109-9 9 9 0 00-7 3M3 4v5h5"/><path d="M12 7v5l3 2"/></svg>;
-    case 'body':      return <svg {...p}><circle cx="12" cy="5" r="2"/><path d="M12 7v6M9 13l-2 5M15 13l2 5M9 10h6"/></svg>;
-    case 'wave':      return <svg {...p}><path d="M2 12c1.5-3 3-4.5 4-4.5s2.5 3 4 3 2.5-3 4-3 2.5 1.5 4 4.5"/></svg>;
-    case 'brain':     return <svg {...p}><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96-.46 2.5 2.5 0 0 1-1.04-4.54 3 3 0 0 1 .36-5.44 2.5 2.5 0 0 1 1.14-4.06A2.5 2.5 0 0 1 9.5 2"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96-.46 2.5 2.5 0 0 0 1.04-4.54 3 3 0 0 0-.36-5.44 2.5 2.5 0 0 0-1.14-4.06A2.5 2.5 0 0 0 14.5 2"/></svg>;
-    case 'eye':       return <svg {...p}><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>;
-    case 'eye-off':   return <svg {...p}><path d="M17.94 17.94A10.1 10.1 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>;
-    case 'logout':    return <svg {...p}><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>;
-    case 'copy':      return <svg {...p}><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>;
-    default: return null;
-  }
-};
+import SIcon from '../components/ui/SIcon.jsx';
 
 /* ============================================================
    APEX VISION LOGO — SVG inline (concentric rounded triangles)
    ============================================================ */
-const ApexLogo = ({ size = 36 }) => {
-  // Rounded equilateral triangle path centered at (50, 50)
-  // Vertices: top(50,10), bottom-right(84,68), bottom-left(16,68)
-  // Rounded corners via quadratic beziers
-  const SHAPE = "M44,21 Q50,10 56,21 C64,36 80,61 81,63 Q87,73 75,73 L25,73 Q13,73 19,63 C20,61 36,36 44,21 Z";
-  const cx = 50, cy = 52;
-  const rings = 9;
-  return (
-    <svg width={size} height={size} viewBox="0 0 100 100" fill="none" style={{ display: 'block' }}>
-      {Array.from({ length: rings }, (_, i) => {
-        const s = 1 - i * (0.82 / (rings - 1));
-        const tx = cx * (1 - s);
-        const ty = cy * (1 - s);
-        const opacity = 0.9 - i * 0.07;
-        return (
-          <path
-            key={i}
-            d={SHAPE}
-            stroke="white"
-            strokeWidth={1.1}
-            fill="none"
-            transform={`translate(${tx.toFixed(2)},${ty.toFixed(2)}) scale(${s.toFixed(3)})`}
-            opacity={opacity.toFixed(2)}
-          />
-        );
-      })}
-    </svg>
-  );
-};
+import ApexLogo from '../components/ui/ApexLogo.jsx';
 
 /* ============================================================
    TOPBAR — con logo y nav funcional
    ============================================================ */
-const scrollToSection = (id) => {
-  const el = document.getElementById(id);
-  if (!el) return;
-  const parent = el.closest('.s-stage');
-  if (parent) {
-    const offset = el.getBoundingClientRect().top - parent.getBoundingClientRect().top + parent.scrollTop - 20;
-    parent.scrollTo({ top: offset, behavior: 'smooth' });
-  } else {
-    window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 20, behavior: 'smooth' });
-  }
-};
-
-const PublicTopBar = ({ onHome, onSection }) => {
-  window.useLang(); const L = window.L;
-  const goSection = (id) => {
-    if (typeof onSection === 'function') {
-      onSection(id);
-    } else {
-      scrollToSection(id);
-    }
-  };
-  const linkStyle = { padding: '8px 16px', fontSize: 12.5, color: 'var(--ink-60)', borderRadius: 999, letterSpacing: '0.04em', cursor: 'pointer', transition: 'color 150ms' };
-  return (
-  <div className="s-topbar">
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }} onClick={onHome}>
-      <ApexLogo size={38} />
-      <div style={{ lineHeight: 1 }}>
-        <div style={{ fontSize: 13, fontWeight: 500, letterSpacing: '0.18em', color: 'var(--ink-90)' }}>APEX</div>
-        <div style={{ fontSize: 9, letterSpacing: '0.28em', color: 'var(--ink-50)', marginTop: 1 }}>VISION</div>
-      </div>
-    </div>
-    <div style={{ display: 'flex', gap: 4 }}>
-      <a onClick={() => goSection('how-it-works')} style={linkStyle} className="hover-link">
-        {L('Cómo funciona', 'How it works')}
-      </a>
-      <a onClick={() => goSection('para-empresas')} style={linkStyle} className="hover-link">
-        {L('Para empresas', 'For teams')}
-      </a>
-      <a onClick={() => goSection('precios')} style={linkStyle} className="hover-link">
-        {L('Precios', 'Pricing')}
-      </a>
-    </div>
-    <div style={{ width: 120 }} />
-  </div>
-  );
-};
+import PublicTopBar from '../components/layout/PublicTopBar.jsx';
 
 /* ============================================================
    LANDING — hero público
