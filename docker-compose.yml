@@ -79,7 +79,7 @@ services:
     restart: unless-stopped
     environment:
       PORT: 8080
-      DB_HOST: postgres
+      DB_HOST: 127.0.0.1
       DB_PORT: 5432
       DB_USER: ${DB_USER:-postgres}
       DB_PASSWORD: ${DB_PASSWORD:-postgres}
@@ -87,9 +87,9 @@ services:
       JWT_SECRET: ${JWT_SECRET:-change_me_in_production}
       JWT_EXPIRY_MINUTES: ${JWT_EXPIRY_MINUTES:-15}
       JWT_REFRESH_EXPIRY_HOURS: ${JWT_REFRESH_EXPIRY_HOURS:-168}
-      RABBITMQ_URL: amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASS:-guest}@rabbitmq:5672/
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASS:-guest}@127.0.0.1:5672/
       MINIO_ENDPOINT: 127.0.0.1:9000
-      MINIO_PUBLIC_ENDPOINT: localhost:9000
+      MINIO_PUBLIC_ENDPOINT: 127.0.0.1:9000
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
       MINIO_BUCKET: ${MINIO_BUCKET:-jupiter-videos}
@@ -125,7 +125,7 @@ services:
     healthcheck:
       test:
       - CMD-SHELL
-      - wget -qO- http://localhost:8080/health || exit 1
+      - wget -qO- http://127.0.0.1:8080/health || exit 1
       interval: 10s
       timeout: 5s
       retries: 5
@@ -229,7 +229,7 @@ services:
     healthcheck:
       test:
       - CMD-SHELL
-      - wget -qO- http://localhost:8001/health || exit 1
+      - wget -qO- http://127.0.0.1:8001/health || exit 1
       interval: 15s
       timeout: 5s
       retries: 3
@@ -246,7 +246,7 @@ services:
       RABBITMQ_USER: ${RABBITMQ_USER:-guest}
       RABBITMQ_PASS: ${RABBITMQ_PASS:-guest}
       DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@127.0.0.1:5432/${DB_NAME:-jupiter}
-      DB_HOST: postgres
+      DB_HOST: 127.0.0.1
       DB_PORT: 5432
       DB_USER: ${DB_USER:-postgres}
       DB_PASSWORD: ${DB_PASSWORD:-postgres}
@@ -262,7 +262,7 @@ services:
     healthcheck:
       test:
       - CMD-SHELL
-      - wget -qO- http://localhost:8002/health || exit 1
+      - wget -qO- http://127.0.0.1:8002/health || exit 1
       interval: 15s
       timeout: 5s
       retries: 3
