@@ -180,6 +180,8 @@ import StepProgress from '../components/ui/StepProgress.jsx';
 const statusLabel = { pending: 'Pendiente', processing: 'Procesando', completed: 'Completado', failed: 'Error' };
 import { SellerDashboard, SellerProgress, SellerCoaching, SellerPlan, SellerSettings, SellerProfile, SellerMainDashboard } from './seller-dashboard/index.jsx';
 
+const HOME_QUESTION = SCENARIOS[0];
+
 Object.assign(window, {
   SIcon, ApexLogo, PublicTopBar, PublicLanding, ScenarioSelector, StepProgress,
   SellerDashboard, SellerProgress, SellerCoaching, SellerPlan, SellerSettings, SellerProfile,
