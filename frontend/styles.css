@@ -65,13 +65,12 @@ body {
     var(--bg-0);
 }
 
-/* Subtle film grain */
+/* Subtle film grain removido temporalmente por impacto masivo en GPU */
 body::before {
   content: '';
   position: fixed; inset: 0;
   pointer-events: none;
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.06 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
-  opacity: 0.2;
+  background: radial-gradient(circle at 50% 0%, rgba(255,255,255,0.03) 0%, transparent 70%);
   z-index: 1;
 }
 
@@ -99,8 +98,8 @@ body::before {
   box-shadow: var(--glass-shadow);
   overflow: hidden;
   /* GPU compositing — prevents particle canvas repaints from invalidating the blur */
-  will-change: transform;
   transform: translateZ(0);
+  will-change: transform, opacity;
   contain: layout style;
 }
 
@@ -140,6 +139,8 @@ body::before {
   -webkit-backdrop-filter: blur(16px) saturate(130%);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-md);
+  transform: translateZ(0);
+  will-change: transform, opacity;
 }
 
 /* ============================================================

@@ -138,6 +138,16 @@
   }, { passive: true });
   window.addEventListener('mouseleave', () => { mouse.active = false; }, { passive: true });
 
+  let scrollTimeout;
+  window.addEventListener('scroll', () => {
+    if (!paused) paused = true;
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(() => {
+      paused = false;
+      step();
+    }, 120);
+  }, { passive: true, capture: true });
+
   if (IS_MOBILE) {
     // Backgrounded/installed PWA: stop burning CPU/battery until it's visible again.
     document.addEventListener('visibilitychange', () => {
