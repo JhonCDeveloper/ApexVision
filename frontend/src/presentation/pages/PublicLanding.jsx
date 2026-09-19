@@ -1,7 +1,7 @@
 import React from 'react';
 import SIcon from '../components/ui/SIcon.jsx';
 
-const FEATURES = [
+export const FEATURES = [
   { icon: 'body',    title: ['Lenguaje corporal', 'Body language'],   desc: ['Postura, gestos, contacto visual y presencia evaluados fotograma a fotograma.', 'Posture, gestures, eye contact and presence evaluated frame by frame.'] },
   { icon: 'wave',    title: ['Análisis de voz', 'Voice analysis'],      desc: ['Velocidad, tono, pausas estratégicas, muletillas y claridad del discurso.', 'Pace, tone, strategic pauses, filler words and speech clarity.'] },
   { icon: 'brain',   title: ['Sugerencias con IA', 'AI suggestions'],   desc: ['Recomendaciones concretas y personalizadas para mejorar en tu próxima presentación.', 'Concrete, personalized recommendations to improve in your next presentation.'] },

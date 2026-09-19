@@ -31,7 +31,7 @@ import PublicTopBar from '../components/layout/PublicTopBar.jsx';
 /* ============================================================
    LANDING — hero público
    ============================================================ */
-import PublicLanding from './PublicLanding.jsx';
+import PublicLanding, { FEATURES } from './PublicLanding.jsx';
 
 /* ============================================================
    ESCENARIOS
