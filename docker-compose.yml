@@ -3,6 +3,8 @@ services:
     image: postgres:16-alpine
     container_name: jupiter-postgres
     restart: unless-stopped
+    ports:
+    - "5432:5432"
     environment:
       POSTGRES_USER: ${DB_USER:-postgres}
       POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
@@ -12,15 +14,18 @@ services:
     healthcheck:
       test:
       - CMD-SHELL
-      - pg_isready -h 127.0.0.1 -U ${DB_USER:-postgres} -d ${DB_NAME:-jupiter}
+      - pg_isready -h postgres -U ${DB_USER:-postgres} -d ${DB_NAME:-jupiter}
       interval: 10s
       timeout: 5s
       retries: 5
-    network_mode: host
+      start_period: 120s
   rabbitmq:
     image: rabbitmq:3.13-management-alpine
     container_name: jupiter-rabbitmq
     restart: unless-stopped
+    ports:
+    - "5672:5672"
+    - "15672:15672"
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-guest}
@@ -34,11 +39,14 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    network_mode: host
+      start_period: 120s
   minio:
     image: quay.io/minio/minio:latest
     container_name: jupiter-minio
     restart: unless-stopped
+    ports:
+    - "9000:9000"
+    - "9001:9001"
     command: server /data --console-address ":9001"
     environment:
       MINIO_ROOT_USER: ${MINIO_ACCESS_KEY:-minioadmin}
@@ -54,7 +62,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-    network_mode: host
+      start_period: 120s
   migrate:
     build:
       context: ./infra/migrations
@@ -65,21 +73,22 @@ services:
     volumes:
     - ./infra/migrations:/migrations
     environment:
-      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@127.0.0.1:5432/${DB_NAME:-jupiter}
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@postgres:5432/${DB_NAME:-jupiter}
     depends_on:
       postgres:
         condition: service_healthy
     restart: 'no'
-    network_mode: host
   gateway:
     build:
       context: ./api-gateway
       dockerfile: Dockerfile
     container_name: jupiter-gateway
     restart: unless-stopped
+    ports:
+    - "8080:8080"
     environment:
       PORT: 8080
-      DB_HOST: 127.0.0.1
+      DB_HOST: postgres
       DB_PORT: 5432
       DB_USER: ${DB_USER:-postgres}
       DB_PASSWORD: ${DB_PASSWORD:-postgres}
@@ -87,15 +96,15 @@ services:
       JWT_SECRET: ${JWT_SECRET:-change_me_in_production}
       JWT_EXPIRY_MINUTES: ${JWT_EXPIRY_MINUTES:-15}
       JWT_REFRESH_EXPIRY_HOURS: ${JWT_REFRESH_EXPIRY_HOURS:-168}
-      RABBITMQ_URL: amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASS:-guest}@127.0.0.1:5672/
-      MINIO_ENDPOINT: 127.0.0.1:9000
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-guest}:${RABBITMQ_PASS:-guest}@rabbitmq:5672/
+      MINIO_ENDPOINT: minio:9000
       MINIO_PUBLIC_ENDPOINT: 127.0.0.1:9000
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:-minioadmin}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:-minioadmin}
       MINIO_BUCKET: ${MINIO_BUCKET:-jupiter-videos}
       MINIO_USE_SSL: 'false'
       MINIO_PUBLIC_USE_SSL: 'false'
-      CORS_ALLOW_ORIGIN: ${CORS_ALLOW_ORIGIN:-http://localhost:8090}
+      CORS_ALLOW_ORIGIN: ${CORS_ALLOW_ORIGIN:-http://localhost:5173}
       GROQ_API_KEY: ${GROQ_API_KEY}
       DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-}
       ELEVENLABS_API_KEY: ${ELEVENLABS_API_KEY:-}
@@ -125,11 +134,10 @@ services:
     healthcheck:
       test:
       - CMD-SHELL
-      - wget -qO- http://127.0.0.1:8080/health || exit 1
+      - wget -qO- http://localhost:8080/health || exit 1
       interval: 10s
       timeout: 5s
       retries: 5
-    network_mode: host
   worker-pose:
     build:
       context: ./ai-workers/pose
@@ -137,12 +145,12 @@ services:
     container_name: jupiter-worker-pose
     restart: unless-stopped
     environment:
-      RABBITMQ_HOST: 127.0.0.1
+      RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
       RABBITMQ_USER: ${RABBITMQ_USER:-guest}
       RABBITMQ_PASS: ${RABBITMQ_PASS:-guest}
-      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@127.0.0.1:5432/${DB_NAME:-jupiter}
-      S3_ENDPOINT_URL: http://127.0.0.1:9000
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@postgres:5432/${DB_NAME:-jupiter}
+      S3_ENDPOINT_URL: http://minio:9000
       AWS_ACCESS_KEY_ID: ${MINIO_ACCESS_KEY:-minioadmin}
       AWS_SECRET_ACCESS_KEY: ${MINIO_SECRET_KEY:-minioadmin}
       AWS_REGION: us-east-1
@@ -164,7 +172,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 120s
-    network_mode: host
   worker-whisper:
     build:
       context: ./ai-workers/whisper
@@ -172,12 +179,12 @@ services:
     container_name: jupiter-worker-whisper
     restart: unless-stopped
     environment:
-      RABBITMQ_HOST: 127.0.0.1
+      RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
       RABBITMQ_USER: ${RABBITMQ_USER:-guest}
       RABBITMQ_PASS: ${RABBITMQ_PASS:-guest}
-      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@127.0.0.1:5432/${DB_NAME:-jupiter}
-      S3_ENDPOINT_URL: http://127.0.0.1:9000
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@postgres:5432/${DB_NAME:-jupiter}
+      S3_ENDPOINT_URL: http://minio:9000
       AWS_ACCESS_KEY_ID: ${MINIO_ACCESS_KEY:-minioadmin}
       AWS_SECRET_ACCESS_KEY: ${MINIO_SECRET_KEY:-minioadmin}
       AWS_REGION: us-east-1
@@ -203,7 +210,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 60s
-    network_mode: host
   worker-prosody:
     build:
       context: ./ai-workers
@@ -211,13 +217,13 @@ services:
     container_name: jupiter-worker-prosody
     restart: unless-stopped
     environment:
-      RABBITMQ_HOST: 127.0.0.1
+      RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
       RABBITMQ_USER: ${RABBITMQ_USER:-guest}
       RABBITMQ_PASS: ${RABBITMQ_PASS:-guest}
-      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@127.0.0.1:5432/${DB_NAME:-jupiter}
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@postgres:5432/${DB_NAME:-jupiter}
       PROSODY_QUEUE: prosody.jobs
-      S3_ENDPOINT_URL: http://127.0.0.1:9000
+      S3_ENDPOINT_URL: http://minio:9000
       AWS_ACCESS_KEY_ID: ${MINIO_ACCESS_KEY:-minioadmin}
       AWS_SECRET_ACCESS_KEY: ${MINIO_SECRET_KEY:-minioadmin}
       AWS_REGION: us-east-1
@@ -229,11 +235,10 @@ services:
     healthcheck:
       test:
       - CMD-SHELL
-      - wget -qO- http://127.0.0.1:8001/health || exit 1
+      - wget -qO- http://localhost:8001/health || exit 1
       interval: 15s
       timeout: 5s
       retries: 3
-    network_mode: host
   worker-scoring:
     build:
       context: ./ai-workers
@@ -241,12 +246,12 @@ services:
     container_name: jupiter-worker-scoring
     restart: unless-stopped
     environment:
-      RABBITMQ_HOST: 127.0.0.1
+      RABBITMQ_HOST: rabbitmq
       RABBITMQ_PORT: 5672
       RABBITMQ_USER: ${RABBITMQ_USER:-guest}
       RABBITMQ_PASS: ${RABBITMQ_PASS:-guest}
-      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@127.0.0.1:5432/${DB_NAME:-jupiter}
-      DB_HOST: 127.0.0.1
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@postgres:5432/${DB_NAME:-jupiter}
+      DB_HOST: postgres
       DB_PORT: 5432
       DB_USER: ${DB_USER:-postgres}
       DB_PASSWORD: ${DB_PASSWORD:-postgres}
@@ -262,29 +267,10 @@ services:
     healthcheck:
       test:
       - CMD-SHELL
-      - wget -qO- http://127.0.0.1:8002/health || exit 1
+      - wget -qO- http://localhost:8002/health || exit 1
       interval: 15s
       timeout: 5s
       retries: 3
-    network_mode: host
-  frontend:
-    image: nginx:alpine
-    container_name: jupiter-frontend
-    restart: unless-stopped
-    volumes:
-    - ./frontend:/usr/share/nginx/html:ro
-    - ./frontend/nginx.conf:/etc/nginx/conf.d/default.conf:ro
-    depends_on:
-      gateway:
-        condition: service_healthy
-    healthcheck:
-      test:
-      - CMD-SHELL
-      - wget -qO- http://127.0.0.1:80/seller || exit 1
-      interval: 15s
-      timeout: 5s
-      retries: 5
-    network_mode: host
 volumes:
   postgres_data: null
   rabbitmq_data: null
