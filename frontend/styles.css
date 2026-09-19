@@ -854,3 +854,5 @@ body::before {
 }
 .toggle.on { background: rgba(255,255,255,0.85); }
 .toggle.on::after { transform: translateX(16px); background: #000; }
+
+.hover-link:hover { color: var(--ink-90) !important; }

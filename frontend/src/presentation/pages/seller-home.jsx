@@ -81,14 +81,8 @@ const ApexLogo = ({ size = 36 }) => {
 const scrollToSection = (id) => {
   const el = document.getElementById(id);
   if (!el) return;
-  // Encontrar el contenedor scrollable (s-stage suele tener overflow:auto)
-  let parent = el.parentElement;
-  while (parent && parent !== document.body) {
-    const cs = getComputedStyle(parent);
-    if (/(auto|scroll)/.test(cs.overflowY)) break;
-    parent = parent.parentElement;
-  }
-  if (parent && parent !== document.body) {
+  const parent = el.closest('.s-stage');
+  if (parent) {
     const offset = el.getBoundingClientRect().top - parent.getBoundingClientRect().top + parent.scrollTop - 20;
     parent.scrollTo({ top: offset, behavior: 'smooth' });
   } else {
@@ -116,15 +110,15 @@ const PublicTopBar = ({ onHome, onSection }) => {
       </div>
     </div>
     <div style={{ display: 'flex', gap: 4 }}>
-      <a onClick={() => goSection('how-it-works')} style={linkStyle}
-        onMouseEnter={e => e.target.style.color = 'var(--ink-90)'}
-        onMouseLeave={e => e.target.style.color = 'var(--ink-60)'}>{L('Cómo funciona', 'How it works')}</a>
-      <a onClick={() => goSection('para-empresas')} style={linkStyle}
-        onMouseEnter={e => e.target.style.color = 'var(--ink-90)'}
-        onMouseLeave={e => e.target.style.color = 'var(--ink-60)'}>{L('Para empresas', 'For teams')}</a>
-      <a onClick={() => goSection('precios')} style={linkStyle}
-        onMouseEnter={e => e.target.style.color = 'var(--ink-90)'}
-        onMouseLeave={e => e.target.style.color = 'var(--ink-60)'}>{L('Precios', 'Pricing')}</a>
+      <a onClick={() => goSection('how-it-works')} style={linkStyle} className="hover-link">
+        {L('Cómo funciona', 'How it works')}
+      </a>
+      <a onClick={() => goSection('para-empresas')} style={linkStyle} className="hover-link">
+        {L('Para empresas', 'For teams')}
+      </a>
+      <a onClick={() => goSection('precios')} style={linkStyle} className="hover-link">
+        {L('Precios', 'Pricing')}
+      </a>
     </div>
     <div style={{ width: 120 }} />
   </div>
