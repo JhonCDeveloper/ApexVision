@@ -26,7 +26,14 @@ from slowapi.errors import RateLimitExceeded
 
 limiter = Limiter(key_func=get_remote_address)
 
-load_dotenv()
+from pathlib import Path
+
+# Load from monorepo root .env if it exists
+root_env_path = Path(__file__).parent.parent.parent / ".env"
+if root_env_path.exists():
+    load_dotenv(dotenv_path=root_env_path)
+else:
+    load_dotenv()
 
 
 # ---------------------------------------------------------------------------
