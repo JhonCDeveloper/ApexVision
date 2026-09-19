@@ -10,7 +10,6 @@ import './infrastructure/api/api-client.js';
 import './infrastructure/i18n.js';
 import './presentation/components/particles.js';
 
-// 3. Cargar componentes (estos se adjuntan a window.ComponentX)
 import './presentation/pages/seller-home.jsx';
 import './presentation/pages/seller-record.jsx';
 import './presentation/pages/seller-results.jsx';

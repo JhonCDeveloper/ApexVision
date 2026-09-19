@@ -71,8 +71,7 @@ body::before {
   position: fixed; inset: 0;
   pointer-events: none;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.06 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
-  opacity: 0.5;
-  mix-blend-mode: overlay;
+  opacity: 0.2;
   z-index: 1;
 }
 
@@ -81,6 +80,7 @@ body::before {
   z-index: 0;
   pointer-events: none;
   will-change: transform; /* promote to own GPU layer — isolates canvas repaints */
+  transform: translateZ(0);
 }
 
 #app { position: relative; z-index: 2; height: 100vh; width: 100vw; }
@@ -92,8 +92,8 @@ body::before {
 .glass {
   position: relative;
   background: var(--glass-bg);
-  backdrop-filter: blur(24px) saturate(140%);
-  -webkit-backdrop-filter: blur(24px) saturate(140%);
+  backdrop-filter: blur(12px) saturate(120%);
+  -webkit-backdrop-filter: blur(12px) saturate(120%);
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   box-shadow: var(--glass-shadow);
