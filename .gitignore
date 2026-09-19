@@ -87,3 +87,16 @@ temp/
 
 # graphify knowledge-graph output (tool artifact)
 graphify-out/
+
+MyDocs/
+
+# =============================================================================
+# Agents & Documentation (Personal Portfolio Cleanup)
+# =============================================================================
+.agents/
+.claude/
+.codex/
+github-mcp/
+.mcp.json
+*.md
+!README.md

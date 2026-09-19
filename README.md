@@ -1,140 +1,82 @@
-# Apex Vision — Sales Evaluator
+<div align="center">
+  <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" />
+  <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white" />
+  <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" />
+  <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" />
+  <img src="https://img.shields.io/badge/RabbitMQ-FF6600?style=for-the-badge&logo=rabbitmq&logoColor=white" />
+  <img src="https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white" />
+</div>
 
-Plataforma web multi-tenant que evalúa habilidades de equipos de ventas analizando lenguaje corporal y audio. Un vendedor responde una pregunta grabándose desde el navegador; el sistema procesa el video con MediaPipe (pose), OpenAI Whisper (transcripción) y librosa (prosodia), agrega los features y los envía a OpenAI GPT-4o para producir un **score** y **recomendaciones** accionables que se muestran en el perfil del vendedor.
+<br>
 
-## Documentación principal
+<h1 align="center">Apex Vision</h1>
+<h3 align="center">AI-Powered Sales Intelligence & Coaching</h3>
 
-| Documento | Para qué sirve |
-|---|---|
-| [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) | Arquitectura completa del MVP: flujo, diagrama, modelo de datos, stack, fases, riesgos |
-| [`docs/TEAM.md`](./docs/TEAM.md) | División de trabajo entre los 4 desarrolladores, contratos compartidos, cadencia |
+<p align="center">
+  <b>Elevate your sales team's performance with real-time AI coaching.</b><br>
+  An advanced multi-tenant B2B platform that analyzes body language, vocal prosody, and speech structure to deliver actionable, AI-driven feedback for sales professionals.
+</p>
 
-Esos dos documentos son la fuente de verdad. Si encontrás una contradicción entre código y doc, abrí un PR para alinearlos.
+<br>
 
-## Estructura del repo
+## <img src="https://api.iconify.design/lucide:sparkles.svg?color=%23009688" width="24" align="center"> Key Features
 
-```
-apex-vision/
-├── docs/
-│   ├── ARCHITECTURE.md      ← arquitectura del sistema
-│   └── TEAM.md              ← división de trabajo y contratos
-├── infra/                   ← docker-compose, k8s, scripts de infra
-├── api-gateway/             ← FastAPI gateway (auth, multi-tenant, presigned URLs, WS) — Python, reemplaza Go
-├── ai-workers/              ← workers de IA (pose, whisper, prosody, scoring)
-├── frontend/                ← React + Vite + Tailwind (grabación + dashboard)
-├── README.md                ← este archivo
-└── .claude/
-    └── skills/
-        └── generate-arch/   ← skill para mantener ARCHITECTURE.md actualizado
-```
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <h4><img src="https://api.iconify.design/lucide:focus.svg?color=%23009688" width="20" align="center"> Computer Vision</h4>
+      <p>Uses <b>MediaPipe</b> to analyze posture, hand gestures, and body language during the pitch in real-time.</p>
+    </td>
+    <td width="50%" valign="top">
+      <h4><img src="https://api.iconify.design/lucide:mic.svg?color=%23009688" width="20" align="center"> Audio Processing</h4>
+      <p>Transcribes speech with high accuracy using <b>OpenAI Whisper</b> and extracts vocal prosody via <b>Librosa</b>.</p>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <h4><img src="https://api.iconify.design/lucide:brain-circuit.svg?color=%23009688" width="20" align="center"> Intelligent Scoring</h4>
+      <p>Aggregates multimodal data and leverages LLMs (<b>GPT-4o</b> / <b>Groq</b>) to generate actionable score and coaching.</p>
+    </td>
+    <td width="50%" valign="top">
+      <h4><img src="https://api.iconify.design/lucide:building-2.svg?color=%23009688" width="20" align="center"> Multi-Tenant B2B</h4>
+      <p>Secure separation of tenant data, RBAC (Sellers vs. Admins), and organizational metrics.</p>
+    </td>
+  </tr>
+</table>
 
-## Cómo arrancar
+## <img src="https://api.iconify.design/lucide:network.svg?color=%23009688" width="24" align="center"> Architecture
 
-Dos scripts de Python multiplataforma (Windows / macOS / Linux). No requieren PowerShell ni bash.
+The system is designed with a scalable, decoupled microservices architecture via **RabbitMQ**:
 
-**1. Instalar dependencias** (crea un venv por proyecto e instala todo):
+- **Frontend (React):** A dynamic dashboard for both Sellers and Admins.
+- **API Gateway (FastAPI):** High-performance asynchronous entry point handling authentication, WebSockets, and S3 presigned URLs.
+- **AI Workers Cluster (Python):** Independent task consumers (Pose, Whisper, Prosody, Scoring) scaling independently based on queue load.
+- **Data & Storage:** **PostgreSQL** for relational data and **MinIO/S3** for raw video storage.
 
-```bash
-python scripts/setup.py
-```
+## <img src="https://api.iconify.design/lucide:zap.svg?color=%23009688" width="24" align="center"> Quickstart
 
-**2. Levantar todos los servicios y dejarlos corriendo:**
-
-```bash
-python scripts/run.py
-```
-
-`run.py` corre el gateway y los workers **de forma nativa** (sin Docker para el código Python). La infraestructura (Postgres, RabbitMQ, MinIO) se controla con `--infra`:
-
-```bash
-python scripts/run.py                  # default: intenta levantar solo la infra con Docker
-python scripts/run.py --infra external # si ya tenés Postgres/RabbitMQ/MinIO corriendo (local o nube)
-python scripts/run.py --infra none     # no toca la infra
-python scripts/run.py --no-workers     # solo gateway + frontend
-```
-
-El script aplica migraciones, siembra datos demo, multiplexa los logs de todos los servicios y los apaga limpiamente con Ctrl+C.
-
-URLs: frontend en `http://localhost:5173/`, API docs en `http://localhost:8080/docs`.
-
-> Si preferís Docker completo y te funciona: `docker compose up -d --build` + `make seed` sigue siendo válido.
-
-Ver detalle por servicio en cada subcarpeta (`api-gateway/README.md`, `ai-workers/README.md`, `frontend/README.md`).
-
----
-
-## Skill incluida: `generate-arch`
-
-En este repo viene una **skill de Claude Code** llamada [`generate-arch`](./.claude/skills/generate-arch/SKILL.md) que ayuda a mantener `ARCHITECTURE.md` sincronizado con el estado real del proyecto a medida que tomamos decisiones.
-
-### Qué hace
-
-Genera o **actualiza** el `ARCHITECTURE.md` del proyecto preservando las decisiones que ya están cerradas. Estructura el documento en 9 secciones fijas (flujo funcional, diagrama, reutilización de código, modelo de datos, contrato del LLM, stack, fases, MCPs/skills, riesgos) y mantiene consistencia cruzada entre ellas — si cambia el stack, también se actualiza el diagrama; si se cierra una decisión abierta, queda marcada con tachado + "resuelto" para preservar el historial.
-
-### Cuándo se activa
-
-La skill se dispara automáticamente cuando le pedís a Claude Code cosas como:
-
-- _"actualizá el ARCHITECTURE.md, ya cerramos que el gateway va en FastAPI"_
-- _"documentá la arquitectura de este nuevo módulo"_
-- _"generá el doc de arquitectura para este MVP"_
-- _"cerramos esta decisión, reflejala en el doc"_
-
-También podés invocarla explícitamente con `/generate-arch`.
-
-### Cómo se usa en el equipo
-
-Cualquier cambio en contratos compartidos (schema de DB, schema de jobs, contrato del LLM, decisiones de stack) tiene que pasar por una actualización de `ARCHITECTURE.md` antes de implementarse. La skill se encarga de:
-
-1. **Leer el doc actual** y entender qué decisiones ya están cerradas (no las pisa).
-2. **Aplicar el cambio** en las secciones afectadas.
-3. **Verificar consistencia** entre secciones (diagrama vs stack vs flujo).
-4. **Marcar el nuevo estado** de la decisión: `(decidido)`, `(sugerido)`, o `pendiente` en la sección 9.
-
-### Ubicación
-
-- En el repo: [`.claude/skills/generate-arch/SKILL.md`](./.claude/skills/generate-arch/SKILL.md) — versionada con el equipo.
-- Para uso personal en cualquier proyecto: copiala a `~/.claude/skills/generate-arch/`.
-
-### Anti-patrones que evita
-
-- Inventar fechas o features no pedidas
-- Boilerplate genérico (SOLID, "buenas prácticas universales")
-- Pisar decisiones cerradas
-- Diagramas con UML pesado (default es ASCII)
-
----
-
-## CI/CD local — Git Hooks
-
-El repo incluye git hooks que corren automáticamente y bloquean pushes rotos **antes** de que lleguen a `developer` o `main`.
-
-### Instalar (una sola vez por máquina)
+Getting the entire stack running locally is incredibly simple thanks to Docker.
 
 ```bash
-make hooks
+# 1. Clone the repository
+git clone https://github.com/JhonCDeveloper/ApexVision.git
+cd ApexVision
+
+# 2. Configure Environment
+cp .env.example .env
+
+# 3. Deploy the Stack
+docker compose up -d --build
+
+# 4. Seed the Database
+docker compose run --rm gateway python seed.py
 ```
 
-### Qué hace cada hook
+## <img src="https://api.iconify.design/lucide:globe.svg?color=%23009688" width="24" align="center"> Access Points
 
-| Hook | Cuándo corre | Qué verifica |
-|---|---|---|
-| `pre-commit` | Antes de cada commit | Lint (ruff / eslint) solo en los servicios con archivos staged |
-| `pre-push` | Antes de cada push | Lint + tests + build en los servicios modificados; pipeline completo en `developer` y `main` |
-
-Si un check falla, el commit/push se cancela con el error exacto. Podés correr `make lint`, `make test` o `make ci` para depurar antes de reintentar.
-
-### Desinstalar
-
-```bash
-make hooks-uninstall
-```
-
----
-
-## Contribuir
-
-1. Branch siguiendo el patrón `<area>/feature/<descripción>` (ver branches existentes).
-2. PRs chicos (< 400 líneas idealmente).
-3. Review obligatorio de al menos 1 dev fuera del dominio.
-4. Si tu cambio toca un contrato compartido (ver `docs/TEAM.md`), actualizá `docs/ARCHITECTURE.md` en el mismo PR usando `/generate-arch`.
+| Service | URL | Credentials |
+|---------|-----|-------------|
+| **Frontend App** | [localhost:5173](http://localhost:5173/Apex%20Vision%20Vendedor.html) | Demo User |
+| **API Docs** | [localhost:8080/docs](http://localhost:8080/docs) | - |
+| **RabbitMQ** | [localhost:15672](http://localhost:15672) | `guest` / `guest` |
+| **MinIO** | [localhost:9001](http://localhost:9001) | `minioadmin` / `minioadmin` |
