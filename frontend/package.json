@@ -1,13 +1,20 @@
 {
-  "name": "frontend",
+  "name": "apex-vision-frontend",
+  "private": true,
   "version": "1.0.0",
-  "description": "Interfaz de usuario para la evaluación de oradores, visualización de métricas de IA en tiempo real y gestión de perfiles de Riwers.",
-  "main": "api-client.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs"
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.26.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",
+    "vite": "^5.4.2"
+  }
 }

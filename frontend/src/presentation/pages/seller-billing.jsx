@@ -1,3 +1,4 @@
+import React from 'react';
 /* ============================================================
    SellerBilling — vista real conectada al backend de Stripe.
    Muestra: saldo de AT, plan activo, planes para suscribirse,

@@ -1,3 +1,4 @@
+import React from 'react';
 /* global React, AVSpark */
 const { useState, useEffect, useRef } = React;
 

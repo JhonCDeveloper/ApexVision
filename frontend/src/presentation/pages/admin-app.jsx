@@ -1,3 +1,4 @@
+import React from 'react';
 const { useState, useEffect, useRef } = React;
 const { SIcon, AVSpark, ApexLogo } = window;
 
@@ -1993,4 +1994,4 @@ const AdminRoot = () => {
   return <AdminApp />;
 };
 
-ReactDOM.createRoot(document.getElementById('root')).render(<AdminRoot />);
+window.AdminApp = AdminRoot;

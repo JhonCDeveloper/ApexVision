@@ -1,3 +1,4 @@
+import React from 'react';
 const { useState, useEffect } = React;
 const { PublicTopBar, PublicLanding, ScenarioSelector, RecordingStage, SellerResults, SIcon, ApexLogo, SellerDashboard, SellerProgress, SellerCoaching, SellerPlan, SellerBilling, SellerSettings, SellerProfile, SellerMainDashboard, LiveRoom, LangToggle } = window;
 const T = (k) => window.I18N.t(k);
@@ -440,4 +441,4 @@ function ApexApp() {
   );
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(<ApexApp />);
+window.SellerApp = ApexApp;

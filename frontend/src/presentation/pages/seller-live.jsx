@@ -1,3 +1,4 @@
+import React from 'react';
 const { useState, useEffect, useRef, useCallback } = React;
 const { SIcon } = window;
 const t = (k, l) => window.I18N.t(k, l);
