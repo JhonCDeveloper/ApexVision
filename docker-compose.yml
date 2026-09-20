@@ -136,10 +136,11 @@ services:
     healthcheck:
       test:
       - CMD-SHELL
-      - wget -qO- http://localhost:8080/health || exit 1
+      - python -c "import urllib.request; urllib.request.urlopen('http://localhost:8080/health', timeout=4)" 2>/dev/null || exit 1
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 30s
   worker-pose:
     build:
       context: ./ai-workers/pose
@@ -168,10 +169,9 @@ services:
     healthcheck:
       test:
       - CMD-SHELL
-      - python -c "import os,sys; sys.exit(0 if any('pose_worker' in open('/proc/'+p+'/cmdline','rb').read().decode('latin1')
-        for p in os.listdir('/proc') if p.isdigit()) else 1)"
+      - kill -0 1
       interval: 30s
-      timeout: 10s
+      timeout: 5s
       retries: 3
       start_period: 120s
   worker-whisper:
@@ -206,10 +206,9 @@ services:
     healthcheck:
       test:
       - CMD-SHELL
-      - python -c "import os,sys; sys.exit(0 if any('whisper_worker' in open('/proc/'+p+'/cmdline','rb').read().decode('latin1')
-        for p in os.listdir('/proc') if p.isdigit()) else 1)"
+      - kill -0 1
       interval: 30s
-      timeout: 10s
+      timeout: 5s
       retries: 3
       start_period: 60s
   worker-prosody:
