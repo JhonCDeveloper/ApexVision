@@ -7,7 +7,7 @@ RABBITMQ_USER = os.getenv("RABBITMQ_USER", "guest")
 RABBITMQ_PASS = os.getenv("RABBITMQ_PASS", "guest")
 RABBITMQ_VHOST = os.getenv("RABBITMQ_VHOST", "/")
 
-SCORING_QUEUE = os.getenv("SCORING_QUEUE", "scoring.jobs")
+FEATURES_RESULTS_QUEUE = os.getenv("FEATURES_RESULTS_QUEUE", "features.results")
 SCORE_READY_EXCHANGE = "scores"
 SCORE_READY_ROUTING_KEY = "score.ready"
 
@@ -35,6 +35,6 @@ def get_channel(connection: "pika.BlockingConnection") -> "pika.adapters.blockin
     import pika
 
     channel = connection.channel()
-    channel.queue_declare(queue=SCORING_QUEUE, durable=True)
-    logger.info("Canal listo. Cola '%s' declarada.", SCORING_QUEUE)
+    channel.queue_declare(queue=FEATURES_RESULTS_QUEUE, durable=True)
+    logger.info("Canal listo. Cola '%s' declarada.", FEATURES_RESULTS_QUEUE)
     return channel

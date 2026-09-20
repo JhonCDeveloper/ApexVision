@@ -18,7 +18,7 @@ import psycopg2
 from dotenv import load_dotenv
 from fastapi import Body, FastAPI, Header, HTTPException, Query, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from app.rabbitmq import init_rabbitmq, close_rabbitmq, start_features_consumer
+from app.rabbitmq import init_rabbitmq, close_rabbitmq
 
 from minio import Minio
 from pydantic import BaseModel, Field, field_validator
@@ -650,7 +650,6 @@ def _startup() -> None:
 @app.on_event("startup")
 async def _startup_rabbitmq() -> None:
     await init_rabbitmq()
-    await start_features_consumer()
 
 @app.on_event("shutdown")
 async def _shutdown_rabbitmq() -> None:

@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 
 from scoring.worker import start_consumer
-from scoring.rabbitmq import SCORING_QUEUE, get_connection, get_channel
+from scoring.rabbitmq import FEATURES_RESULTS_QUEUE, get_connection, get_channel
 
 logging.basicConfig(
     level=logging.INFO,
@@ -38,7 +38,7 @@ def health_check():
     try:
         conn = get_connection()
         ch = get_channel(conn)
-        queue_info = ch.queue_declare(queue=SCORING_QUEUE, durable=True, passive=True)
+        queue_info = ch.queue_declare(queue=FEATURES_RESULTS_QUEUE, durable=True, passive=True)
         message_count = queue_info.method.message_count
         conn.close()
     except Exception as exc:
@@ -52,7 +52,7 @@ def health_check():
             "status": "ok" if status_code == 200 else "degraded",
             "service": "apex-vision-scoring-worker",
             "rabbitmq": rabbitmq_status,
-            "queue": SCORING_QUEUE,
+            "queue": FEATURES_RESULTS_QUEUE,
             "messages_in_queue": message_count,
         },
     )

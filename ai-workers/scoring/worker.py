@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 import pika
 
 from scoring.rabbitmq import (
-    SCORING_QUEUE,
+    FEATURES_RESULTS_QUEUE,
     SCORE_READY_EXCHANGE,
     SCORE_READY_ROUTING_KEY,
     get_connection,
@@ -150,17 +150,23 @@ def on_scoring_job(channel, method, properties, body: bytes) -> None:
     )
 
     try:
+        # Avoid scoring twice if already completed
+        if get_evaluation_status(job.evaluation_id) in ("completed", "failed"):
+            logger.info("[%s] Evaluation ya procesada | evaluation_id=%s", timestamp, job.evaluation_id)
+            channel.basic_ack(delivery_tag=delivery_tag)
+            return
+
         features = fetch_features_by_evaluation(job.evaluation_id)
 
         if not all_features_ready(job.evaluation_id):
             required = {"pose", "transcript", "prosody"}
             missing = sorted(required - set(features.keys()))
-            logger.error(
-                "Features incompletos en Fan-In pattern (violacion de contrato) | evaluation_id=%s faltantes=%s",
+            logger.info(
+                "Features incompletos, esperando siguientes... | evaluation_id=%s faltantes=%s",
                 job.evaluation_id, missing,
             )
-            # Do NOT requeue. Fan-In guarantees this shouldn't happen.
-            channel.basic_nack(delivery_tag=delivery_tag, requeue=False)
+            # basic_ack because we want to drop this message. The next feature result will trigger another check.
+            channel.basic_ack(delivery_tag=delivery_tag)
             return
 
         # Difficulty/context: first-class columns (migration 0005); the title
@@ -239,11 +245,11 @@ def _blocking_consume() -> None:
             channel = get_channel(connection)
             channel.basic_qos(prefetch_count=1)
             channel.basic_consume(
-                queue=SCORING_QUEUE,
+                queue=FEATURES_RESULTS_QUEUE,
                 on_message_callback=on_scoring_job,
                 auto_ack=False,
             )
-            logger.info("Scoring consumer iniciado en '%s'", SCORING_QUEUE)
+            logger.info("Scoring consumer (Fan-In mode) iniciado en '%s'", FEATURES_RESULTS_QUEUE)
             channel.start_consuming()
 
         except pika.exceptions.AMQPConnectionError as exc:
