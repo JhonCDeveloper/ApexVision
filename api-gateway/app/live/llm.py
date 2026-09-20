@@ -1,8 +1,6 @@
 """Streaming LLM for the live agent.
 
-DeepSeek remains the primary provider. In local/dev environments we also allow
-Groq as an OpenAI-compatible fallback because the live stack already requires
-GROQ_API_KEY for STT.
+Uses OpenAI (gpt-4o-mini) as the LLM provider.
 """
 
 from __future__ import annotations
@@ -16,11 +14,8 @@ import httpx
 
 logger = logging.getLogger("jupiter.gateway.live.llm")
 
-DEEPSEEK_URL = "https://api.deepseek.com/chat/completions"
-DEEPSEEK_MODEL = os.getenv("LIVE_LLM_MODEL", "deepseek-chat")
-GROQ_CHAT_URL = "https://api.groq.com/openai/v1/chat/completions"
-GROQ_CHAT_MODEL = os.getenv("LIVE_GROQ_MODEL", "llama-3.1-8b-instant")
-
+OPENAI_URL = "https://api.openai.com/v1/chat/completions"
+OPENAI_MODEL = os.getenv("LIVE_LLM_MODEL", "gpt-4o-mini")
 
 async def _stream_openai_compatible(
     *,
@@ -67,40 +62,23 @@ async def _stream_openai_compatible(
         logger.warning("%s stream error: %s", provider, exc)
         return
 
-
 async def stream_reply(
     system_prompt: str,
     history: list[dict[str, str]],
 ) -> AsyncIterator[str]:
-    """Yield response token deltas. DeepSeek is primary; Groq is fallback."""
+    """Yield response token deltas using OpenAI."""
     messages = [{"role": "system", "content": system_prompt}, *history]
-    deepseek_key = os.getenv("DEEPSEEK_API_KEY", "").strip()
-    groq_key = os.getenv("GROQ_API_KEY", "").strip()
+    openai_key = os.getenv("OPENAI_API_KEY", "").strip()
 
-    providers: list[tuple[str, str, str, str]] = []
-    if deepseek_key:
-        providers.append(("DeepSeek", DEEPSEEK_URL, deepseek_key, DEEPSEEK_MODEL))
-    elif not groq_key:
-        logger.warning("No live LLM key configured; set DEEPSEEK_API_KEY or GROQ_API_KEY")
-
-    if groq_key:
-        if not deepseek_key:
-            logger.warning("DEEPSEEK_API_KEY not configured; using Groq live LLM fallback")
-        providers.append(("Groq", GROQ_CHAT_URL, groq_key, GROQ_CHAT_MODEL))
-
-    if not providers:
+    if not openai_key:
+        logger.warning("No live LLM key configured; set OPENAI_API_KEY")
         return
 
-    for provider, url, key, model in providers:
-        yielded = False
-        async for delta in _stream_openai_compatible(
-            provider=provider,
-            url=url,
-            key=key,
-            model=model,
-            messages=messages,
-        ):
-            yielded = True
-            yield delta
-        if yielded:
-            return
+    async for delta in _stream_openai_compatible(
+        provider="OpenAI",
+        url=OPENAI_URL,
+        key=openai_key,
+        model=OPENAI_MODEL,
+        messages=messages,
+    ):
+        yield delta

@@ -15,8 +15,8 @@ import httpx
 
 logger = logging.getLogger("jupiter.gateway.live.scoring")
 
-DEEPSEEK_URL = "https://api.deepseek.com/chat/completions"
-DEEPSEEK_MODEL = os.getenv("LIVE_LLM_MODEL", "deepseek-chat")
+DEEPSEEK_URL = "https://api.openai.com/v1/chat/completions"
+DEEPSEEK_MODEL = os.getenv("LIVE_LLM_MODEL", "gpt-4o-mini")
 
 # rubric dimensions per mode: key -> {es, en}
 RUBRICS = {
@@ -102,7 +102,7 @@ async def score_session(*, mode: str, lang: str, persona_name: str, history: lis
     user_turns = [m for m in history if m["role"] == "user"]
     if len(user_turns) < 1:
         return None
-    key = os.getenv("DEEPSEEK_API_KEY", "").strip()
+    key = os.getenv("OPENAI_API_KEY", "").strip()
     if not key:
         return None
 
