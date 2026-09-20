@@ -23,7 +23,7 @@ def get_connection() -> pika.BlockingConnection:
         port=RABBITMQ_PORT,
         virtual_host=RABBITMQ_VHOST,
         credentials=credentials,
-        heartbeat=60,
+        heartbeat=0,
         blocked_connection_timeout=300,
     )
     connection = pika.BlockingConnection(parameters)
