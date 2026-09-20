@@ -5,12 +5,33 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException, Header, Request, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy import update, func
+from sqlalchemy import update, func, text
 from app.db import get_db
 from app.models import Evaluation, Feature, CoachMessage
 from app.auth.dependencies import require_user, parse_bearer, decode_token
 from app.minio_utils import get_minio_client, get_minio_bucket, presigned_upload_url
-from app.rabbitmq import publish_job
+import json
+import os
+import pika
+
+def _publish_job_sync(routing_key: str, body: dict) -> None:
+    """Publish a job message using a short-lived pika BlockingConnection (no global state)."""
+    url = os.getenv("RABBITMQ_URL", "amqp://guest:guest@rabbitmq:5672/")
+    try:
+        params = pika.URLParameters(url)
+        conn = pika.BlockingConnection(params)
+        ch = conn.channel()
+        ch.queue_declare(queue=routing_key, durable=True)
+        ch.basic_publish(
+            exchange="",
+            routing_key=routing_key,
+            body=json.dumps(body).encode(),
+            properties=pika.BasicProperties(delivery_mode=2),
+        )
+        conn.close()
+    except Exception as exc:
+        import logging
+        logging.getLogger("jupiter.evaluations").error(f"[rabbitmq] publish_job_sync failed: {exc}")
 from app.evaluations.schemas import CreateEvaluationRequest, EvaluationCreateResponse
 from app.billing.evaluation import billing_enforced, MIN_AT_TO_START_EVALUATION
 
@@ -147,19 +168,21 @@ async def complete_evaluation(
     video_url = f"s3://{get_minio_bucket()}/{tenant_id}/{evaluation_id}/original.mp4"
     
     # Publish to the 3 workers. Fan-in logic will publish to scoring.jobs later.
-    await publish_job("pose.jobs", {
+    import asyncio
+    loop = asyncio.get_event_loop()
+    await loop.run_in_executor(None, _publish_job_sync, "pose.jobs", {
         "job_id": f"{evaluation_id}-pose",
         "evaluation_id": evaluation_id,
         "tenant_id": tenant_id,
         "video_url": video_url,
     })
-    await publish_job("whisper.jobs", {
+    await loop.run_in_executor(None, _publish_job_sync, "whisper.jobs", {
         "job_id": f"{evaluation_id}-whisper",
         "evaluation_id": evaluation_id,
         "tenant_id": tenant_id,
         "video_url": video_url,
     })
-    await publish_job("prosody.jobs", {
+    await loop.run_in_executor(None, _publish_job_sync, "prosody.jobs", {
         "job_id": f"{evaluation_id}-prosody",
         "evaluation_id": evaluation_id,
         "tenant_id": tenant_id,
@@ -202,7 +225,7 @@ async def list_evaluations(
     items = eval_result.scalars().all()
     
     return {
-        "items": [_row_to_evaluation(e) for e in items],
+        "data": [_row_to_evaluation(e) for e in items],
         "total": total,
         "page": page,
         "limit": limit,

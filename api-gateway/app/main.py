@@ -18,6 +18,8 @@ import psycopg2
 from dotenv import load_dotenv
 from fastapi import Body, FastAPI, Header, HTTPException, Query, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from app.rabbitmq import init_rabbitmq, close_rabbitmq, start_features_consumer
+
 from minio import Minio
 from pydantic import BaseModel, Field, field_validator
 from slowapi import Limiter, _rate_limit_exceeded_handler
@@ -169,6 +171,17 @@ app.include_router(billing_webhook_router)
 from app.context.routes import router as context_router  # noqa: E402
 
 app.include_router(context_router)
+
+# Import new async routers
+from app.auth.routes import router as auth_router
+from app.admin.routes import router as admin_router
+from app.evaluations.routes import router as eval_router
+from app.evaluations.coach_routes import router as coach_router
+
+app.include_router(auth_router)
+app.include_router(admin_router)
+app.include_router(eval_router)
+app.include_router(coach_router)
 
 
 @app.exception_handler(InsufficientBalance)
@@ -633,6 +646,16 @@ def _startup() -> None:
         ensure_evaluations_table(conn)
         ensure_coach_history_table(conn)
         ensure_registration_codes_table(conn)
+
+@app.on_event("startup")
+async def _startup_rabbitmq() -> None:
+    await init_rabbitmq()
+    await start_features_consumer()
+
+@app.on_event("shutdown")
+async def _shutdown_rabbitmq() -> None:
+    await close_rabbitmq()
+
 
 
 

@@ -478,6 +478,9 @@ window.LiveRoom = function LiveRoom({ onClose, initialMode, initialScore, initia
   const restart = () => { setScore(undefined); setScoring(false); setVideoEval(undefined); setTurns([]); setPartial(''); setPhase('setup'); endSession(); };
   const switchMode = (m) => { setMode(m); setRole((ROLE_DEF[m] || ROLE_DEF.presentacion)[0].id); };
   const isInt = mode === 'entrevista';
+  const curRole = roleList.find(r => r.id === role);
+  const roleLbl = curRole ? (curRole[lang] || curRole.es)[0] : '';
+  const modeLbl = isInt ? t('mode.interview') : t('mode.sales');
   const STATE_LABEL = { connecting: t('live.state.connecting'), listening: t('live.state.listening'), thinking: t('live.state.thinking'), speaking: t('live.state.speaking') };
 
   /* ════ SETUP ════ */
@@ -721,8 +724,6 @@ window.LiveRoom = function LiveRoom({ onClose, initialMode, initialScore, initia
 
   /* ════ LIVE ════ */
   const accent = (PALETTE[state] || PALETTE.connecting)[2];
-  const curRole = roleList.find(r => r.id === role); const roleLbl = curRole ? (curRole[lang] || curRole.es)[0] : '';
-  const modeLbl = isInt ? t('mode.interview') : t('mode.sales');
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 300, background: 'radial-gradient(circle at 50% 30%, rgba(30,27,55,0.6), rgba(8,8,11,0.98))', backdropFilter: 'blur(16px)', display: 'flex', flexDirection: 'column' }}>
       {/* self-view: confirma que la cámara graba para el análisis de lenguaje corporal */}

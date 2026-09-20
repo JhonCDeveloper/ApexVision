@@ -43,7 +43,7 @@ async def admin_list_evaluations(
         items.append(item)
 
     return {
-        "items": items,
+        "data": items,
         "total": total,
         "page": page,
         "limit": limit,
@@ -67,11 +67,16 @@ async def generate_registration_code(authorization: str | None = Header(default=
     return {"code": code, "tenant_id": str(tenant_id)}
 
 @router.get("/registration-codes")
-async def list_registration_codes(authorization: str | None = Header(default=None), db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
-    admin_id, tenant_id = require_admin(authorization)
+async def list_registration_codes(
+    authorization: str | None = Header(default=None),
+    db: AsyncSession = Depends(get_db)
+) -> dict[str, Any]:
+    _user_id, tenant_id = require_admin(authorization)
     
     result = await db.execute(
-        select(RegistrationCode).where(RegistrationCode.tenant_id == tenant_id).order_by(desc(RegistrationCode.created_at))
+        select(RegistrationCode)
+        .where(RegistrationCode.tenant_id == tenant_id)
+        .order_by(RegistrationCode.created_at.desc())
     )
     codes = result.scalars().all()
     
@@ -84,4 +89,4 @@ async def list_registration_codes(authorization: str | None = Header(default=Non
             "used_by_user_id": str(c.used_by_user_id) if c.used_by_user_id else None
         })
         
-    return {"items": items}
+    return {"data": items}
