@@ -93,14 +93,14 @@ def analyze_audio(
     duration = librosa.get_duration(y=y, sr=sr)
     logger.info("Audio cargado: %.2f s, sr=%d Hz", duration, sr)
 
-    # --- Pitch (F0) using librosa.pyin ---
-    f0, voiced_flag, _ = librosa.pyin(
+    # --- Pitch (F0) using librosa.yin (much faster than pyin) ---
+    f0 = librosa.yin(
         y,
         fmin=librosa.note_to_hz("C2"),
         fmax=librosa.note_to_hz("C7"),
         sr=sr,
     )
-    f0_valid = f0[voiced_flag] if voiced_flag is not None else f0[~np.isnan(f0)]
+    f0_valid = f0[~np.isnan(f0)]
     pitch_median = float(np.median(f0_valid)) if len(f0_valid) > 0 else 0.0
     pitch_variance = float(np.var(f0_valid)) if len(f0_valid) > 0 else 0.0
 

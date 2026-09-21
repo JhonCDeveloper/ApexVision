@@ -406,7 +406,7 @@ window.LiveRoom = function LiveRoom({ onClose, initialMode, initialScore, initia
           const data = await window.ApexAPI.getEvaluation(evalId);
           if (data.status === 'completed') { clearInterval(poll); setVideoEval(data); }
           else if (data.status === 'failed') { clearInterval(poll); setVideoEval('failed'); }
-          else if (Date.now() - startedAt > 180000) { clearInterval(poll); setVideoEval('failed'); }
+          else if (Date.now() - startedAt > 600000) { clearInterval(poll); setVideoEval('failed'); }
         } catch (_) {}
       }, 3000);
     } catch (_) { setVideoEval('failed'); }
