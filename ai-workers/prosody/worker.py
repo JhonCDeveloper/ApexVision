@@ -157,7 +157,7 @@ def on_prosody_job(channel, method, properties, body: bytes) -> None:
             exchange=RESULTS_EXCHANGE, exchange_type="topic", durable=True
         )
         pub_channel.basic_publish(
-            exchange=RESULTS_EXCHANGE,
+            exchange="",
             routing_key=RESULT_ROUTING_KEY,
             body=result_body.encode("utf-8"),
             properties=pika.BasicProperties(
