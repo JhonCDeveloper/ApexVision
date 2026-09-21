@@ -58,7 +58,7 @@ def _download_from_s3(s3_url: str) -> str:
             ["ffmpeg", "-y", "-i", video_path, "-vn", "-acodec", "pcm_s16le",
              "-ar", "16000", "-ac", "1", audio_path],
             capture_output=True,
-            timeout=30,
+            timeout=300,
             check=True,
         )
     finally:
